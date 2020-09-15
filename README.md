@@ -1,7 +1,7 @@
 # TodoApp-BackEnd
 
 
-This repository contains a test RESTful API Server on a ToDo Application.
+This repository contains a test RESTful API Server of a ToDo Application + SQLite managed by SQLAlchmey.
 
 ---
 #### `How To Use?`
