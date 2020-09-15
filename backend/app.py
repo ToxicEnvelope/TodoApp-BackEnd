@@ -2,10 +2,12 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from backend.database import db_session, db_init
 from time import time
-from modules import Todos, datetime, __COMPLETED__, __NOT_STARTED__
+from modules.datatypes import Todos, datetime, __COMPLETED__, __NOT_STARTED__
 
 app = Flask(__name__)
 CORS(app)
+
+
 app.config['SECRET_KEY'] = 'wA-hKPtOY3HDrBU_PFiLeBE6CeNJ8j3cSMd14VAf11v7LVvxyatmHKKsylWSTNar0sr1VJNxoXYG9GwB-HaZcQ'
 
 __BASE_URI = '/api/v1'
@@ -15,7 +17,6 @@ __STATUS_TEST = 'test'
 __STATUS_NOT_FOUND = 'not found'
 
 stamp = lambda: int(time().__str__()[:10])
-
 
 
 @app.before_first_request
