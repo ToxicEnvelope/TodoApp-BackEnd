@@ -3,7 +3,7 @@ from backend.database import Base
 from uuid import uuid5, NAMESPACE_X500
 import datetime
 
-__LOREM_STRING__ = ""
+__LOREM_STRING__ = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
 __NOT_STARTED__ = "NOT STARTED"
 __COMPLETED__ = "COMPLETED"
 __IS_COMPLETED__ = False
