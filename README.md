@@ -17,21 +17,21 @@ The repository focuses on a `ToDo List` Application backend.
 #### `API's Routes`
 
 The base URI is `/api/v1`
-##### `GET: {baseURI}/todos`  
+##### `GET: {baseURI}/tasks`  
 
 - get all todo tasks from the Database , return `status 200` or `status 403`
-##### `GET: {baseURI}/todos/<task_id>`  
+##### `GET: {baseURI}/tasks/<task_id>`  
 
 - get a todo tasks by ID from the Database , return `status 200`, `status 403` or `status 404`
-##### `POST: {baseURI}/todos`  
+##### `POST: {baseURI}/tasks`  
 
 - create a new todo task in the Database , return `status 201` or `status 403`
 - payload: `{"taskDescription": String}`
-##### `PUT: {baseURI}/todos/<task_id>`  
+##### `PUT: {baseURI}/tasks/<task_id>`  
 
 - update a todo task by ID in the Database , return `status 202`, `status 403` or `status 404`
 - payload: `{"taskDescription": String, "isCompleted": Boolean}`
-##### `DELETE: {baseURI}/todos/<task_id>`  
+##### `DELETE: {baseURI}/tasks/<task_id>`  
 
 - delete a todo task by ID in the Database , return `status 200`, `status 403` or `status 404`
 
