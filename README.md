@@ -8,7 +8,8 @@ The repository focuses on a `ToDo List` Application backend.
 ---
 #### `How To Use?`
 
-- Before all, make sure to `pip install requirements.txt` to install all dependencies.
+- Before all, make sure to install all dependencies via command-line:
+      - `pip install requirements.txt`
 - Simply run `todo_resful_app.py` module by using the command-line:  
         - `python todo_resful_app.py`
         
