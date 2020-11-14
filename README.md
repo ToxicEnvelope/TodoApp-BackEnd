@@ -30,20 +30,26 @@ The base URI is `/api/v1`
 
 ##### `GET: {baseURI}/tasks`  
 - get all todo tasks from the Database , return `status 200` or `status 403`
+- headers: should conatins `Authorization` token
+
 
 ##### `GET: {baseURI}/tasks/<task_id>`  
 - get a todo tasks by ID from the Database , return `status 200`, `status 403` or `status 404`
+- headers: should conatins `Authorization` token
 
 ##### `POST: {baseURI}/tasks`  
 - create a new todo task in the Database , return `status 201` or `status 403`
 - payload: `{"taskDescription": String}`
+- headers: should conatins `Authorization` token
 
 ##### `PUT: {baseURI}/tasks/<task_id>`  
 - update a todo task by ID in the Database , return `status 202`, `status 403` or `status 404`
 - payload: `{"taskDescription": String, "isCompleted": Boolean}`
+- headers: should conatins `Authorization` token
 
 ##### `DELETE: {baseURI}/tasks/<task_id>`  
 - delete a todo task by ID in the Database , return `status 200`, `status 403` or `status 404`
+- headers: should conatins `Authorization` token
 
 ---
 #### `Database Schema`
