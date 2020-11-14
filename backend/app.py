@@ -492,12 +492,3 @@ def delete_todo_task_by_id(task_id):
     resp = make_response(response)
     resp.status_code = 403
     return resp
-
-
-if __name__ == '__main__':
-    import sys
-    # if '--debug' in sys.argv:
-    #     app.run('0.0.0.0', 8081, debug=True)
-    # else:
-    #     app.run('0.0.0.0', 8081, debug=False)
-    app.run('0.0.0.0', 8081, debug=True)
