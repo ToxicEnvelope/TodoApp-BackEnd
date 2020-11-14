@@ -7,10 +7,10 @@ The repository focuses on a `ToDo List` Application backend.
 
 ---
 #### `How To Use?`
-
-- Before all, make sure to install all dependencies via command-line:
+- Backend configuration file:
     - create a config file `backend.json` under the `conf` directory, should contains `{"server_key" : "my-super-secret-server-key"}`
-    - `python todo_resful_app.py`
+- Install all dependencies via command-line:
+    - `pip install -i requirements.txt` or `python -m pip install requirements.txt`
 - Simply run `todo_resful_app.py` module by using the command-line:  
     - `python todo_resful_app.py`
         
