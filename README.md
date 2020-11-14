@@ -6,6 +6,11 @@ This repository contains a test RESTful API Server + SQLite Database managed via
 The repository focuses on a `ToDo List` Application backend.
 
 ---
+#### `Additionals`
+We provide an `Authorization: <token>` in headers instead of the standard
+`Authorization: Bearer <token>`
+
+---
 #### `How To Use?`
 - Backend configuration file:
     - create a config file `backend.json` under the `conf` directory, should contains `{"server_key" : "my-super-secret-server-key"}`
@@ -54,7 +59,7 @@ The base URI is `/api/v1`
 ---
 #### `Database Schema`
 
-Simple connection to `todo-tasks.db`, no auth required.
+Simple connect to `todo-tasks.db`, no auth required.
 We suggest to open the db connection using `DB Browser for SQLite`,
 download from here -> https://sqlitebrowser.org/dl
 
