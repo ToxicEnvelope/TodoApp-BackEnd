@@ -17,22 +17,29 @@ The repository focuses on a `ToDo List` Application backend.
 #### `API's Routes`
 
 The base URI is `/api/v1`
+##### `POST: {baseURI}/users/sign-in`
+- create a user in the Database , return `status 201`, `status 403`, `status 405` or `status 406`
+- payload: `{"name": String, "email": String, "password": String}`
+
+##### `POST: {baseURI}/users/login`
+- create a session the Database , return `status 200`, `status 401`, `status 403` or `status 405`
+- payload: `{"email": String, "password": String}`
+
 ##### `GET: {baseURI}/tasks`  
-
 - get all todo tasks from the Database , return `status 200` or `status 403`
+
 ##### `GET: {baseURI}/tasks/<task_id>`  
-
 - get a todo tasks by ID from the Database , return `status 200`, `status 403` or `status 404`
-##### `POST: {baseURI}/tasks`  
 
+##### `POST: {baseURI}/tasks`  
 - create a new todo task in the Database , return `status 201` or `status 403`
 - payload: `{"taskDescription": String}`
-##### `PUT: {baseURI}/tasks/<task_id>`  
 
+##### `PUT: {baseURI}/tasks/<task_id>`  
 - update a todo task by ID in the Database , return `status 202`, `status 403` or `status 404`
 - payload: `{"taskDescription": String, "isCompleted": Boolean}`
-##### `DELETE: {baseURI}/tasks/<task_id>`  
 
+##### `DELETE: {baseURI}/tasks/<task_id>`  
 - delete a todo task by ID in the Database , return `status 200`, `status 403` or `status 404`
 
 ---
