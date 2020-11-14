@@ -13,7 +13,7 @@ The repository focuses on a `ToDo List` Application backend.
     - `pip install -i requirements.txt` or `python -m pip install requirements.txt`
 - Simply run `todo_resful_app.py` module by using the command-line:  
     - `python todo_resful_app.py`
-        
+
 ---
 #### `API's Routes`
 
@@ -21,10 +21,12 @@ The base URI is `/api/v1`
 ##### `POST: {baseURI}/users/sign-in`
 - create a user in the Database , return `status 201`, `status 403`, `status 405` or `status 406`
 - payload: `{"name": String, "email": String, "password": String}`
+- headers: `JWT` will be produced after a successful `sign-in`
 
 ##### `POST: {baseURI}/users/login`
 - create a session the Database , return `status 200`, `status 401`, `status 403` or `status 405`
 - payload: `{"email": String, "password": String}`
+- headers: `JWT` will be produced after a successful `login`
 
 ##### `GET: {baseURI}/tasks`  
 - get all todo tasks from the Database , return `status 200` or `status 403`
