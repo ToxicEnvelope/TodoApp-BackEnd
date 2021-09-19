@@ -100,7 +100,7 @@ def heartbeat():
 def user_register():
     if request.method.__eq__('POST'):
         data = request.get_json()
-        if not data or not data["email"] or not data["password"]:
+        if data is None or data["email"] is None or data["password"] is None:
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
@@ -113,7 +113,7 @@ def user_register():
         user_email = data['email']
         hashed_password = generate_password_hash(data['password'], method='sha256')
         optional_user = Users.query.filter_by(email=user_email).first()
-        if not optional_user:
+        if optional_user is None:
             new_user = Users(user_name, user_email, hashed_password)
             new_user.token = new_user.encode_auth_token(new_user.id)
             db_session.add(new_user)
@@ -150,7 +150,7 @@ def user_register():
 def user_login():
     if request.method.__eq__('POST'):
         data = request.get_json()
-        if not data or len(data) == 0:
+        if data is None or len(data) == 0:
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
@@ -202,7 +202,7 @@ def get_all_todo_task():
     if request.method.__eq__('GET'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if not optional_user:
+        if optional_user is None:
             response = {
                 "status": Fail,
                 "timestamp": stamp()
@@ -243,7 +243,7 @@ def get_todo_task_by_id(task_id):
     if request.method.__eq__('GET'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if not optional_user:
+        if optional_user is None:
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
@@ -253,7 +253,7 @@ def get_todo_task_by_id(task_id):
             resp.status_code = 404
             return resp
         todo_obj = Todos.query.filter_by(user_id=optional_user.id, id=task_id).first()
-        if not todo_obj:
+        if todo_obj is None:
             response = {
                 'timestamp': stamp(),
                 'status': Fail,
@@ -291,7 +291,7 @@ def add_new_todo_task():
     if request.method.__eq__('POST'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if not optional_user:
+        if optional_user is None:
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
@@ -332,7 +332,7 @@ def update_todo_task_by_id(task_id):
     if request.method.__eq__('PUT'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if not optional_user:
+        if optional_user is None:
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
@@ -389,7 +389,7 @@ def delete_todo_task_by_id(task_id):
     if request.method.__eq__('DELETE'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if not optional_user:
+        if optional_user is None:
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
@@ -399,7 +399,7 @@ def delete_todo_task_by_id(task_id):
             resp.status_code = 404
             return resp
         todo_obj = Todos.query.filter_by(user_id=optional_user.id, id=task_id).first()
-        if not todo_obj:
+        if todo_obj is None:
             response = {
                 'timestamp': stamp(),
                 'status': Fail,
