@@ -18,7 +18,8 @@ logging.basicConfig(
 )
 create_logger(app)
 sys.stdout.write('\n [+] Database Location Path : %s\n' % PathUtil.get_database_path())
-sys.stdout.write(' [+] Logs Runtime Path : %s\n\n' % PathUtil.get_logs_path())
+sys.stdout.write(' [+] Logs Runtime Path : %s\n' % PathUtil.get_logs_path())
+sys.stdout.write(' [+] Server is running : http://localhost:9000 \n\n')
 sys.stdout.write(' -----------------------------------------------------\n\n')
 
 app.config['SECRET_KEY'] = 'd032c84b34cdb5b061af09151a758688bc732371'
