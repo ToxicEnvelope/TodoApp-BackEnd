@@ -1,6 +1,5 @@
 import jwt
 import datetime
-from backend import Config
 from sqlalchemy import Column, DateTime, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from backend.database import Base
@@ -44,7 +43,7 @@ class Users(Base):
         }
         return jwt.encode(
             payload=payload,
-            key=Config.get('server_key'),
+            key='d032c84b34cdb5b061af09151a758688bc732371',
             algorithm="HS256"
         )
 
