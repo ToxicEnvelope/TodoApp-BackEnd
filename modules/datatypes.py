@@ -1,6 +1,5 @@
 import jwt
 import datetime
-from backend import Config
 from sqlalchemy import Column, DateTime, String, Boolean, ForeignKey
 from sqlalchemy.orm import relationship
 from backend.database import Base
@@ -22,12 +21,12 @@ class Users(Base):
     created_time = Column(DateTime(), nullable=False)
     modified_time = Column(DateTime(), nullable=False)
     token = Column(String(256), unique=True, nullable=True)
-    todos = relationship('Todos', backref='task_to_user', cascade='all,delete')
+    tasks = relationship('Tasks', backref='task_to_user', cascade='all,delete')
 
-    def __init__(self, name=None, email=None, passwd=None):
+    def __init__(self, name=None, email=None, password=None):
         self.name = name
         self.email = email
-        self.password = passwd
+        self.password = password
         self.created_time = datetime.datetime.now()
         self.modified_time = datetime.datetime.now()
         self.id = uuid5(NAMESPACE_X500, f'{self.name}-{self.created_time}').__str__()
@@ -44,13 +43,13 @@ class Users(Base):
         }
         return jwt.encode(
             payload=payload,
-            key=Config.get('server_key'),
+            key='wA-hKPtOY3HDrBU_PFiLeBE6CeNJ8j3cSMd14VAf11v7LVvxyatmHKKsylWSTNar0sr1VJNxoXYG9GwB-HaZcQ',
             algorithm="HS256"
         )
 
 
-class Todos(Base):
-    __tablename__ = 'todos'
+class Tasks(Base):
+    __tablename__ = 'tasks'
     id = Column(String(50), primary_key=True, unique=True)
     user_id = Column(String, ForeignKey('users.id'))
     time_created = Column(DateTime(), nullable=False, unique=True)
@@ -67,4 +66,21 @@ class Todos(Base):
         self.isVisible = __IS_COMPLETED__
 
     def __repr__(self):
-        return '<Todo %r>' % self.id
+        return '<Task %r>' % self.id
+
+class Records(Base):
+    __tablename__ = 'recordings'
+    id = Column(String(50), primary_key=True, unique=True)
+    url = Column(String(256), nullable=False, unique=False)
+    method = Column(String(8), nullable=False, unique=False)
+    time_created = Column(DateTime(), nullable=False, unique=True)
+
+    def __init__(self, req_obj=None, resp_obj=None):
+        self.time_created = datetime.datetime.now()
+        self.url = req_obj.url.__str__()
+        self.method = req_obj.method
+        self.status_code = resp_obj.status_code
+        self.id = resp_obj.headers['x-response-id']
+
+    def __repr__(self):
+        return '<Record %r>' % self.__dict__
