@@ -1,8 +1,5 @@
-import sys
-from backend.app import app
-
+from uvicorn import run
 
 if __name__ == '__main__':
-    args = sys.argv
-    app.run(host='0.0.0.0', port=8081, debug=True if '--debug' in args else False)
+    run('backend.app:app', host='0.0.0.0', port=9000)
 
