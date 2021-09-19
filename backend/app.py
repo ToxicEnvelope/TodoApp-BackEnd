@@ -55,7 +55,7 @@ async def write_to_db(request: Request, call_next):
 
 @app.get(AppRoutes.Health.value)
 async def health():
-    return await flows.check.health(log)
+    return await flows.check.health()
 
 @app.post(AppRoutes.Register.value)
 async def register(request: Request):

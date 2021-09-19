@@ -1,13 +1,16 @@
 import jwt
+from fastapi.logger import logger as fapi_logger
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from backend.enums import AppStates
-from backend.helpers import now
+from backend.helpers import now, Logger
 from functools import wraps
+
+log = Logger(fapi_logger)
 
 ############################################################################################################
 
-async def health(log):
+async def health():
     log.info('checking server health status')
     return JSONResponse(content=jsonable_encoder({
         'status': AppStates.Success.value,
