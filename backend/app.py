@@ -1,31 +1,24 @@
 import jwt
 from functools import wraps
-from flask import Flask, jsonify, request, session, make_response
-from flask_cors import CORS
+from flask import Flask, request, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
 from backend.database import db_session, db_init
-from time import time
 from modules.datatypes import Todos, Users, datetime, __COMPLETED__, __NOT_STARTED__
-from backend import Config
 
 app = Flask(__name__)
-CORS(app)
 
 
-app.config['SECRET_KEY'] = Config.get('server_key')
+app.config['SECRET_KEY'] = 'd032c84b34cdb5b061af09151a758688bc732371'
 
-__BASE_URI = '/api/v1'
-__STATUS_SUCCESS = 'success'
-__STATUS_FAIL = 'fail'
-__STATUS_TEST = 'test'
-__STATUS_NOT_FOUND = 'not found'
+Success = 'success'
+Fail = 'fail'
 
-stamp = lambda: int(time().__str__()[:10])
+def stamp(): return datetime.datetime.now().isoformat()
 
 
 def get_jwt_decode_data():
     token = request.headers.get('Authorization')
-    session_data = jwt.decode(token, app.config['SECRET_KEY'])
+    session_data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
     return session_data
 
 
@@ -39,8 +32,9 @@ def check_for_token(func, header='Authorization'):
             resp.status_code = 403
             return resp
         try:
-            data = jwt.decode(token, app.config['SECRET_KEY'])
-            print(data)
+            data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+            assert 'sub' in data
+            
         except:
             session['logged_in'] = False
             resp = make_response({'message': 'Invalid token'})
@@ -60,18 +54,7 @@ def session_shutdown(exception=None):
     db_session.remove()
 
 
-@app.route(rule=f'{__BASE_URI}/status', methods=['GET'])
-def status():
-    response = {
-        'timestamp': stamp(),
-        'status': __STATUS_TEST
-    }
-    resp = make_response(response)
-    resp.status_code = 200
-    return resp
-
-
-@app.route(rule=f'{__BASE_URI}/heartbeat', methods=['GET'])
+@app.route(rule='/api/heartbeat', methods=['GET'])
 @check_for_token
 def heartbeat():
     data = get_jwt_decode_data()
@@ -90,7 +73,7 @@ def heartbeat():
     db_session.add(user_obj)
     db_session.commit()
     response = {
-        "status": __STATUS_SUCCESS,
+        "status": Success,
         "timestamp": stamp()
     }
     resp = make_response(response)
@@ -98,28 +81,15 @@ def heartbeat():
     return resp
 
 
-@app.route(rule=f'{__BASE_URI}/users/sign-in', methods=['POST'])
+@app.route(rule='/api/users/register', methods=['POST'])
 def create_new_user():
-    '''
-        :description:
-            - user sign in , creation of new user
-        :generate:
-            - new user object in todo-tasks db
-        :param:
-            - accepts JSON with
-                'name', 'email', 'password'
-        :returns:
-            - JSON response
-    '''
-    recall = request
-    if recall.method.__eq__('POST'):
-        data = recall.get_json()
-        if data is None or data["email"] is None or data["password"] is None:
-            e = Exception('data is missing!')
+    if request.method.__eq__('POST'):
+        data = request.get_json()
+        if not data or not data["email"] or not data["password"]:
             response = {
-                "status": STATUS_FAILED,
+                "status": Fail,
                 "timestamp": stamp(),
-                "reason": e.__str__()
+                "reason": "data is missing!"
             }
             resp = make_response(response)
             resp.status_code = 403
@@ -128,61 +98,48 @@ def create_new_user():
         user_email = data['email']
         hashed_password = generate_password_hash(data['password'], method='sha256')
         optional_user = Users.query.filter_by(email=user_email).first()
-        if optional_user is None:
+        if not optional_user:
             new_user = Users(user_name, user_email, hashed_password)
             new_user.token = new_user.encode_auth_token(new_user.id)
             db_session.add(new_user)
             db_session.commit()
             session['logged_in'] = True
             response = {
-                "status": __STATUS_SUCCESS,
+                "status": Success,
                 "timestamp": stamp()
             }
             resp = make_response(response)
-            resp.headers['Authorization'] = new_user.token.decode()
+            resp.headers['Authorization'] = new_user.token
             resp.status_code = 201
             return resp
         else:
-            e = Exception("User already exists!")
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp(),
-                "reason": e.__str__()
+                "reason": "User already exists!"
             }
             resp = make_response(response)
             resp.status_code = 406
             return resp
-    e = Exception("Unable to process request!")
     response = {
-        "status": __STATUS_FAIL,
+        "status": Fail,
         "timestamp": stamp(),
-        "reason": e.__str__()
+        "reason": "Unable to process request!"
     }
     resp = make_response(response)
     resp.status_code = 405
     return resp
 
 
-@app.route(rule=f'{__BASE_URI}/users/login', methods=['POST'])
+@app.route(rule='/api/users/login', methods=['POST'])
 def user_login():
-    '''
-        :description:
-            - make a login with existing user
-        :param:
-            - accepts JSON with
-                'email', 'password'
-        :return:
-            - JSON response
-    '''
-    recall = request
-    if recall.method.__eq__('POST'):
-        data = recall.get_json()
-        if data is None or len(data) == 0:
-            e = Exception('data is missing!')
+    if request.method.__eq__('POST'):
+        data = request.get_json()
+        if not data or len(data) == 0:
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp(),
-                "reason": e.__str__()
+                "reason": "data is missing!"
             }
             resp = make_response(response)
             resp.status_code = 403
@@ -190,7 +147,7 @@ def user_login():
         user_email = data['email']
         user_password = data['password']
         optional_user = Users.query.filter_by(email=user_email).first()
-        if optional_user is not None and check_password_hash(optional_user.password, user_password):
+        if optional_user and check_password_hash(optional_user.password, user_password):
             session['logged_in'] = True
             auth_token = optional_user.encode_auth_token(optional_user.id)
             optional_user.token = auth_token
@@ -198,50 +155,42 @@ def user_login():
             db_session.add(optional_user)
             db_session.commit()
             response = {
-                "status": __STATUS_SUCCESS,
+                "status": Success,
                 "timestamp": stamp(),
                 "message": "Login Successfully!",
             }
             resp = make_response(response)
-            resp.headers['Authorization'] = optional_user.token.decode()
+            resp.headers['Authorization'] = optional_user.token
             resp.status_code = 200
             return resp
         else:
-            e = Exception("Unauthorized! email / password is not correct.")
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp(),
-                "reason": e.__str__()
+                "reason": "Unauthorized! email / password is not correct"
             }
             resp = make_response(response)
             resp.status_code = 401
             return resp
-    e = Exception("Unable to verify WWW-Authenticate: Basic realm 'login realm'")
     response = {
-        "status": __STATUS_FAIL,
+        "status": Fail,
         "timestamp": stamp(),
-        "reason": e.__str__()
+        "reason": "Unable to verify WWW-Authenticate: Basic realm 'login realm'"
     }
     resp = make_response(response)
     resp.status_code = 405
     return resp
 
 
-@app.route(rule=f'{__BASE_URI}/tasks', methods=['GET'])
+@app.route(rule='/api/tasks', methods=['GET'])
 @check_for_token
 def get_all_todo_task():
-    '''
-        :description:
-            - retrieve all tasks associated to user by token from todo-tasks db
-        :return:
-            - JSON response
-    '''
-    if request.method == 'GET':
+    if request.method.__eq__('GET'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if optional_user is None:
+        if not optional_user:
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp()
             }
             resp = make_response(response)
@@ -259,7 +208,7 @@ def get_all_todo_task():
             content.append(todo_obj_data)
         response = {
             'timestamp': stamp(),
-            'status': __STATUS_SUCCESS,
+            'status': Success,
             'data': content
         }
         resp = make_response(response)
@@ -267,41 +216,32 @@ def get_all_todo_task():
         return resp
     response = {
         'timestamp': stamp(),
-        'status': __STATUS_FAIL
+        'status': Fail
     }
     resp = make_response(response)
     resp.status_code = 403
     return resp
 
 
-@app.route(rule=f'{__BASE_URI}/tasks/<task_id>', methods=['GET'])
+@app.route(rule='/api/tasks/<task_id>', methods=['GET'])
 @check_for_token
 def get_todo_task_by_id(task_id):
-    '''
-        :description:
-            - retrieve a single task object from todo-tasks db
-        :param:
-            - URL params
-                'task_id'
-        :return:
-            - JSON response
-    '''
-    if request.method == 'GET':
+    if request.method.__eq__('GET'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if optional_user is None:
+        if not optional_user:
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp()
             }
             resp = make_response(response)
             resp.status_code = 404
             return resp
         todo_obj = Todos.query.filter_by(user_id=optional_user.id, id=task_id).first()
-        if todo_obj is None:
+        if not todo_obj:
             response = {
                 'timestamp': stamp(),
-                'status': __STATUS_NOT_FOUND,
+                'status': Fail,
                 'data': {}
             }
             resp = make_response(response)
@@ -315,7 +255,7 @@ def get_todo_task_by_id(task_id):
         }
         response = {
             'timestamp': stamp(),
-            'status': __STATUS_SUCCESS,
+            'status': Success,
             'data': todo_obj_data
         }
         resp = make_response(response)
@@ -323,31 +263,22 @@ def get_todo_task_by_id(task_id):
         return resp
     response = {
         'timestamp': stamp(),
-        'status': __STATUS_FAIL
+        'status': Fail
     }
     resp = make_response(response)
     resp.status_code = 403
     return resp
 
 
-@app.route(rule=f'{__BASE_URI}/tasks', methods=['POST'])
+@app.route(rule='/api/tasks', methods=['POST'])
 @check_for_token
 def add_new_todo_task():
-    '''
-        :description:
-            - create a new task associated with user by token
-        :param:
-            - accepts JSON with
-                'taskDescription'
-        :return:
-            - JSON response
-    '''
-    if request.method == 'POST':
+    if request.method.__eq__('POST'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if optional_user is None:
+        if not optional_user:
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp()
             }
             resp = make_response(response)
@@ -360,7 +291,7 @@ def add_new_todo_task():
         db_session.commit()
         response = {
             'timestamp': stamp(),
-            'status': __STATUS_SUCCESS,
+            'status': Success,
             'data': {
                 'taskId': new_todo.id,
                 'taskCreationTime': new_todo.time_created
@@ -371,41 +302,32 @@ def add_new_todo_task():
         return resp
     response = {
         'timestamp': stamp(),
-        'status': __STATUS_FAIL
+        'status': Fail
     }
     resp = make_response(response)
     resp.status_code = 403
     return resp
 
 
-@app.route(rule=f'{__BASE_URI}/tasks/<task_id>', methods=['PUT'])
+@app.route(rule='/api/tasks/<task_id>', methods=['PUT'])
 @check_for_token
 def update_todo_task_by_id(task_id):
-    '''
-        :description:
-            - update an existing task resource to todo-tasks db
-        :param:
-            - URL params
-                'task_id'
-        :return:
-            - JSON response
-    '''
-    if request.method == 'PUT':
+    if request.method.__eq__('PUT'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if optional_user is None:
+        if not optional_user:
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp()
             }
             resp = make_response(response)
             resp.status_code = 404
             return resp
         todo_obj = Todos.query.filter_by(user_id=optional_user.id, id=task_id).first()
-        if todo_obj is None:
+        if not todo_obj:
             response = {
                 'timestamp': stamp(),
-                'status': __STATUS_NOT_FOUND,
+                'status': Fail,
                 'data': {}
             }
             resp = make_response(response)
@@ -425,7 +347,7 @@ def update_todo_task_by_id(task_id):
         db_session.commit()
         response = {
             'timestamp': stamp(),
-            'status': __STATUS_SUCCESS,
+            'status': Success,
             'data': {
                 'taskId': todo_obj.id,
                 'taskUpdateTime': todo_obj.time_created
@@ -436,41 +358,32 @@ def update_todo_task_by_id(task_id):
         return resp
     response = {
         'timestamp': stamp(),
-        'status': __STATUS_FAIL
+        'status': Fail
     }
     resp = make_response(response)
     resp.status_code = 403
     return resp
 
 
-@app.route(rule=f'{__BASE_URI}/tasks/<task_id>', methods=['DELETE'])
+@app.route(rule='/api/tasks/<task_id>', methods=['DELETE'])
 @check_for_token
 def delete_todo_task_by_id(task_id):
-    '''
-        :description:
-            - delete an existing task resource associated to user by token from todo-tasks db
-        :param:
-            - URL param
-                'task_id'
-        :return:
-            - JSON response
-    '''
-    if request.method == 'DELETE':
+    if request.method.__eq__('DELETE'):
         session_data = get_jwt_decode_data()
         optional_user = Users.query.filter_by(id=session_data['sub']).first()
-        if optional_user is None:
+        if not optional_user:
             response = {
-                "status": __STATUS_FAIL,
+                "status": Fail,
                 "timestamp": stamp()
             }
             resp = make_response(response)
             resp.status_code = 404
             return resp
         todo_obj = Todos.query.filter_by(user_id=optional_user.id, id=task_id).first()
-        if todo_obj is None:
+        if not todo_obj:
             response = {
                 'timestamp': stamp(),
-                'status': __STATUS_NOT_FOUND,
+                'status': Fail,
                 'data': {}
             }
             resp = make_response(response)
@@ -480,14 +393,14 @@ def delete_todo_task_by_id(task_id):
         db_session.commit()
         response = {
             'timestamp': stamp(),
-            'status': __STATUS_SUCCESS
+            'status': Success
         }
         resp = make_response(response)
         resp.status_code = 200
         return resp
     response = {
         'timestamp': stamp(),
-        'status': __STATUS_FAIL
+        'status': Fail
     }
     resp = make_response(response)
     resp.status_code = 403
