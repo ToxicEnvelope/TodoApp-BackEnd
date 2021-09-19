@@ -57,12 +57,12 @@ class Todos(Base):
     task_status = Column(String(25), nullable=False, unique=False, default=__NOT_STARTED__)
     is_completed = Column(Boolean(), nullable=False, unique=False, default=__IS_COMPLETED__)
 
-    def __init__(self, todo_description=None, user_id=None):
+    def __init__(self, description=None, user_id=None):
         self.user_id = user_id
         self.id = uuid5(NAMESPACE_X500, f'{self.user_id}-{datetime.datetime.now().ctime()}').__str__()
         self.time_created = datetime.datetime.now()
         self.task_status = __NOT_STARTED__
-        self.task_description = todo_description
+        self.task_description = description
         self.isVisible = __IS_COMPLETED__
 
     def __repr__(self):
