@@ -82,7 +82,7 @@ def heartbeat():
 
 
 @app.route(rule='/api/users/register', methods=['POST'])
-def create_new_user():
+def user_register():
     if request.method.__eq__('POST'):
         data = request.get_json()
         if not data or not data["email"] or not data["password"]:
@@ -116,7 +116,7 @@ def create_new_user():
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
-                "reason": "User already exists!"
+                "reason": "user already exists!"
             }
             resp = make_response(response)
             resp.status_code = 406
@@ -124,7 +124,7 @@ def create_new_user():
     response = {
         "status": Fail,
         "timestamp": stamp(),
-        "reason": "Unable to process request!"
+        "reason": "unable to process request!"
     }
     resp = make_response(response)
     resp.status_code = 405
@@ -156,8 +156,7 @@ def user_login():
             db_session.commit()
             response = {
                 "status": Success,
-                "timestamp": stamp(),
-                "message": "Login Successfully!",
+                "timestamp": stamp()
             }
             resp = make_response(response)
             resp.headers['Authorization'] = optional_user.token
@@ -167,7 +166,7 @@ def user_login():
             response = {
                 "status": Fail,
                 "timestamp": stamp(),
-                "reason": "Unauthorized! email / password is not correct"
+                "reason": "unauthorized! email / password is not correct"
             }
             resp = make_response(response)
             resp.status_code = 401
@@ -232,7 +231,8 @@ def get_todo_task_by_id(task_id):
         if not optional_user:
             response = {
                 "status": Fail,
-                "timestamp": stamp()
+                "timestamp": stamp(),
+                "reason": "no such user"
             }
             resp = make_response(response)
             resp.status_code = 404
@@ -279,14 +279,16 @@ def add_new_todo_task():
         if not optional_user:
             response = {
                 "status": Fail,
-                "timestamp": stamp()
+                "timestamp": stamp(),
+                "reason": "no such user"
             }
             resp = make_response(response)
             resp.status_code = 404
             return resp
         payload = request.get_json()
         task_description = payload['taskDescription']
-        new_todo = Todos(user_id=optional_user.id, todo_description=task_description)
+        new_todo = Todos(user_id=optional_user.id)
+        new_todo.task_description = task_description
         db_session.add(new_todo)
         db_session.commit()
         response = {
@@ -318,7 +320,8 @@ def update_todo_task_by_id(task_id):
         if not optional_user:
             response = {
                 "status": Fail,
-                "timestamp": stamp()
+                "timestamp": stamp(),
+                "reason": "no such user"
             }
             resp = make_response(response)
             resp.status_code = 404
@@ -374,7 +377,8 @@ def delete_todo_task_by_id(task_id):
         if not optional_user:
             response = {
                 "status": Fail,
-                "timestamp": stamp()
+                "timestamp": stamp(),
+                "reason": "no such user"
             }
             resp = make_response(response)
             resp.status_code = 404
