@@ -34,9 +34,9 @@ class PathUtil(object, metaclass=Singleton):
     @staticmethod
     def get_logs_path():
         if platform().lower().startswith('win'):
-            final_path = PathUtil.resource_path(r'runtime_%s.log' % datetime.datetime.now().isoformat())
+            final_path = PathUtil.resource_path(r'runtime_%s.log' % datetime.date.today())
             logs_dir = r'%s' % final_path
         else:
-            final_path = PathUtil.resource_path('runtime_%s.log' % datetime.datetime.now().isoformat())
+            final_path = PathUtil.resource_path('runtime_%s.log' % datetime.date.today())
             logs_dir = '%s' % final_path
         return logs_dir
