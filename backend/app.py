@@ -1,19 +1,37 @@
+import sys
+
 import jwt
+import logging
 from functools import wraps
+from os.path import join, dirname, abspath
+from flask.logging import create_logger
 from flask import Flask, request, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.database import db_session, db_init
+from backend.database import db_session, db_init, db_path_string
 from modules.datatypes import Todos, Users, datetime, __COMPLETED__, __NOT_STARTED__
 
+root_dir = join(dirname(dirname(abspath(__file__))))
+date_now = datetime.datetime.now().isoformat()
+logs_dir = r'%s\logs\runtime-%s.log' % (root_dir, date_now)
 app = Flask(__name__)
+logging.basicConfig(
+    level=logging.DEBUG,
+    filemode='w',
+    filename=logs_dir,
+    format='%(threadName)s_%(thread)d | %(filename)s | %(asctime)s | %(levelname)s | %(message)s'
+)
+create_logger(app)
+sys.stdout.write('\n\n [+] Database Location Path : %s\n' % db_path_string)
+sys.stdout.write(' [+] Logs Runtime Path : %s\n\n--------------------------------------------------\n\n' % logs_dir)
 
 
 app.config['SECRET_KEY'] = 'd032c84b34cdb5b061af09151a758688bc732371'
-
 Success = 'success'
 Fail = 'fail'
 
-def stamp(): return datetime.datetime.now().isoformat()
+
+def stamp():
+    return datetime.datetime.now().isoformat()
 
 
 def get_jwt_decode_data():
