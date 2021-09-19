@@ -1,5 +1,4 @@
 import sys
-
 import jwt
 import logging
 from functools import wraps
