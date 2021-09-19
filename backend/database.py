@@ -7,6 +7,7 @@ import sys
 
 global name
 
+
 def path_resolver():
     global name
     """ Get absolute path to resource, works for dev and for PyInstaller """
