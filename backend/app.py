@@ -5,7 +5,7 @@ from functools import wraps
 from flask.logging import create_logger
 from flask import Flask, request, session, make_response
 from werkzeug.security import generate_password_hash, check_password_hash
-from backend.database import db_session, db_init, db_path_string
+from backend.database import db_session, db_init
 from backend.helpers import PathUtil
 from modules.datatypes import Todos, Users, datetime, __COMPLETED__, __NOT_STARTED__
 
